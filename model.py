@@ -3,6 +3,7 @@ import base64
 from datetime import datetime
 import os
 import shutil
+import copy
 
 import numpy as np
 import socketio
@@ -54,8 +55,22 @@ for line in lines:
     measurement = float(line[3])
     measurements.append(measurement)
 
+
+
+
+a_images = [cv2.flip(im, 1) for im in images]
+a_measurements = [(measurement * - 1.0) for measurement in measurements]
+images = np.append(images, a_images, axis = 0)
+measurements = np.append(measurements, a_measurements, axis = 0)
+
 X_train = np.array(images)
 y_train = np.array(measurements)
+
+
+print ("Images-shape: %s" %(len(images)))
+print ("a_images_shape: %s" %(len(a_images)))
+print ("X_train-shape :" + str(X_train.shape))
+print ("y_train_shape :" + str(y_train.shape))
 
 
 from keras.models import Sequential
@@ -76,7 +91,7 @@ model.add(Dense(84))
 model.add(Dense(1))
 
 model.compile(loss='mse', optimizer='adam')
-model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=5)
+model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=5, batch_size=32)
 
 model.save('model.h5')
 exit()
