@@ -41,7 +41,7 @@ with  open(args.csv_file, "r") as csv_file:
 
 images = []
 measurements = []    
-camera_tilts = [0.0, 0.18, -0.18]
+camera_tilts = [0.0, 0.2, -0.2]
 
 
 from sklearn.utils import shuffle
@@ -173,28 +173,35 @@ print ("y_train_shape :" + str(y_train.shape))
 
 '''
 
+
 from keras.models import Sequential
-from keras.layers import Flatten, Dense, Lambda
+from keras.layers import Flatten, Dense, Lambda, Dropout
 from keras.layers.convolutional import Convolution2D, Cropping2D
 from keras.layers.pooling import MaxPooling2D, AveragePooling2D
 
 model = Sequential()
 model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=(160, 320, 3)))
-
 model.add(Cropping2D(cropping=((70,25), (0,0))))
 model.add(AveragePooling2D())
 # model.add(Convolution2D(3,5,5, subsample=(2,2), activation='relu'))
 # model.add(Flatten(input_shape=(160, 320, 3)))
 model.add(Convolution2D(12,5,5,activation='relu'))
+model.add(Dropout(0.4))
+model.add(MaxPooling2D())
 model.add(Convolution2D(14,3,3,activation='relu'))
+model.add(Dropout(0.4))
 model.add(MaxPooling2D())
 model.add(Convolution2D(16,5,5,activation='relu'))
-model.add(Convolution2D(18,5,5,activation='relu'))
+model.add(Dropout(0.2))
+#model.add(Convolution2D(18,5,5,activation='relu'))
 model.add(Flatten())
 # model.add(Dense(400))
 model.add(Dense(240))
-model.add(Dense(160))
+model.add(Dropout(0.2))
+#model.add(Dense(160))
+#model.add(Dropout(0.2))
 model.add(Dense(96))
+model.add(Dropout(0.2))
 model.add(Dense(1))
 
 model.compile(loss='mse', optimizer='adam')
@@ -207,7 +214,7 @@ model.compile(loss='mse', optimizer='adam')
 
 model.fit_generator(train_generator, samples_per_epoch= \
             len(train_samples) * 6, validation_data=validation_generator, \
-            nb_val_samples=len(validation_samples) * 6, nb_epoch=3, verbose=1
+            nb_val_samples=len(validation_samples) * 6, nb_epoch=2, verbose=1
             )
 
 
