@@ -33,53 +33,40 @@ if (not os.path.isdir(args.img_dir)):
     exit(1)
 
 
-lines = []
+samples = []
 with  open(args.csv_file, "r") as csv_file:
     reader = csv.reader(csv_file)
     for line in reader:
-        lines.append(line)
+        samples.append(line)
 
 images = []
 measurements = []    
 camera_tilts = [0.0, 0.18, -0.18]
 
-'''
-import os
-import csv
-import sklearn
 
-samples = []
-with open('./driving_log.csv') as csvfile:
-    reader = csv.reader(csvfile)
-    for line in reader:
-        samples.append(line)
-
-
+from sklearn.utils import shuffle
 shuffle(samples)
 
 from sklearn.model_selection import train_test_split
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 
+def generator(samples, batch_size=36):
 
-# ---
-
-import sklearn
-
-def generator(samples, batch_size=96):
-
-    num_samples = len(samples) / 6
     while 1: # Loop forever so the generator never terminates
         shuffle(samples)
-        num_entries = batch_size / 6 # Generate 6 images per entry.
-        
-        for offset in range(0, num_samples, num_entries):
-            batch_samples = samples[offset : offset + num_entries]
-
-            images = []
-            measurements = []
-            for batch_sample in batch_samples:
-                for c_pos in range(3):
-                    source_path = line[c_pos]
+        offset = 0
+        while offset < len(samples):
+            next_sample = samples[offset]
+            batch_images = []
+            batch_measurements = []
+            current_batch_size = 0
+            while current_batch_size < batch_size:
+                rem = batch_size - current_batch_size
+                if (rem >= 6):
+                    rem = 6
+                # Add the center, left and right images.
+                for c_pos in range(int(rem / 2)):
+                    source_path = next_sample[c_pos]
                     filename = source_path.split('/')[-1]
                     img_path = args.img_dir + '/' + filename
                     if (not os.path.isfile(img_path)):
@@ -87,42 +74,34 @@ def generator(samples, batch_size=96):
                         exit(1)
                     image = cv2.imread(img_path)
 
-                    images.append(image)
+                    batch_images.append(image)
                     # Using only the center image 
-                    measurement = float(line[c_pos + 3]) + camera_tilts[c_pos]
-                    measurements.append(measurement)
-                
-                a_images = [cv2.flip(im, 1) for im in images]
-                a_measurements = [(measurement * - 1.0) for measurement in measurements]
-                images = np.append(images, a_images, axis = 0)
-                measurements = np.append(measurements, a_measurements, axis = 0)
+                    measurement = float(next_sample[c_pos + 3]) + camera_tilts[c_pos]
+                    batch_measurements.append(measurement)
+                # Add the mirror images for a given image.
+                a_images = [cv2.flip(im, 1) for im in batch_images]
+                a_measurements = [(measurement * - 1.0) for measurement in batch_measurements]
+                ret_batch_images = np.append(batch_images, a_images, axis = 0)
+                ret_batch_measurements = np.append(batch_measurements, a_measurements, axis = 0)
+                current_batch_size = current_batch_size + rem
+            offset += 1
 
             # trim image to only see section with road
-            X_train = np.array(images)
-            y_train = np.array(angles)
-            yield sklearn.utils.shuffle(X_train, y_train)
+            X_train_batch = np.array(ret_batch_images)
+            y_train_batch = np.array(ret_batch_measurements)
+            yield shuffle(X_train_batch, y_train_batch)
 
 # compile and train the model using the generator function
-train_generator = generator(train_samples, batch_size=96)
-validation_generator = generator(validation_samples, batch_size=96)
+train_generator = generator(train_samples, batch_size=36)
+validation_generator = generator(validation_samples, batch_size=36)
 
 ch, row, col = 3, 80, 320  # Trimmed image format
 
-model = Sequential()
-# Preprocess incoming data, centered around zero with small standard deviation 
-model.add(Lambda(lambda x: x/127.5 - 1.,
-        input_shape=(ch, row, col),
-        output_shape=(ch, row, col)))
-model.add(... finish defining the rest of your model architecture here ...)
-
-model.compile(loss='mse', optimizer='adam')
-model.fit_generator(train_generator, samples_per_epoch= /
-            len(train_samples), validation_data=validation_generator, /
-            nb_val_samples=len(validation_samples), nb_epoch=3)
 
 
-# ---
 '''
+# ---
+
 from keras.backend import tf as ktf
 def normalize_and_shrink(img):
      img = (img / 255.0) - 0.5
@@ -192,6 +171,7 @@ print ("a_images_shape: %s" %(len(a_images)))
 print ("X_train-shape :" + str(X_train.shape))
 print ("y_train_shape :" + str(y_train.shape))
 
+'''
 
 from keras.models import Sequential
 from keras.layers import Flatten, Dense, Lambda
@@ -200,26 +180,37 @@ from keras.layers.pooling import MaxPooling2D, AveragePooling2D
 
 model = Sequential()
 model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=(160, 320, 3)))
+
 model.add(Cropping2D(cropping=((70,25), (0,0))))
+model.add(AveragePooling2D())
 # model.add(Convolution2D(3,5,5, subsample=(2,2), activation='relu'))
 # model.add(Flatten(input_shape=(160, 320, 3)))
 model.add(Convolution2D(12,5,5,activation='relu'))
+model.add(Convolution2D(14,3,3,activation='relu'))
 model.add(MaxPooling2D())
 model.add(Convolution2D(16,5,5,activation='relu'))
-model.add(MaxPooling2D())
-model.add(Convolution2D(20,5,5,activation='relu'))
-model.add(MaxPooling2D())
+model.add(Convolution2D(18,5,5,activation='relu'))
 model.add(Flatten())
+# model.add(Dense(400))
 model.add(Dense(240))
 model.add(Dense(160))
 model.add(Dense(96))
 model.add(Dense(1))
 
 model.compile(loss='mse', optimizer='adam')
-model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=7, batch_size=128)
+# model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=7, batch_size=16)
 # model.fit_generator(train_generator, samples_per_epoch=len(X_train)
 #            len(train_samples), validation_data=validation_generator, /
 #            nb_val_samples=len(validation_samples), nb_epoch=3)
+# fit_generator(generator, steps_per_epoch, epochs=1, verbose=1, callbacks=None, \ 
+# validation_data=None, validation_steps=None, )
+
+model.fit_generator(train_generator, samples_per_epoch= \
+            len(train_samples) * 6, validation_data=validation_generator, \
+            nb_val_samples=len(validation_samples) * 6, nb_epoch=3, verbose=1
+            )
+
+
 
 model.save('model.h5')
 exit()
