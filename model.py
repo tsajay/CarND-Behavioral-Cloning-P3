@@ -187,30 +187,35 @@ model.add(Cropping2D(cropping=((70,25), (0,0))))
 model.add(AveragePooling2D(strides=(2,2)))
 model.add(Convolution2D(4,3,3,activation='relu'))
 model.add(MaxPooling2D(strides=(2,2)))
-model.add(Dropout(0.25))
+#model.add(Dropout(0.25))
 
 model.add(Convolution2D(8,3,3,activation='relu'))
-model.add(MaxPooling2D(strides=(2,2)))
+#model.add(Dropout(0.25))
+
+model.add(Convolution2D(4 ,3,3,activation='relu'))
 model.add(Dropout(0.25))
 
-model.add(Convolution2D(8,3,3,activation='relu'))
-model.add(MaxPooling2D(strides=(2,2)))
+model.add(Convolution2D(4 ,3,3,activation='relu'))
+#model.add(Dropout(0.25))
+
+model.add(Convolution2D(4 ,3,3,activation='relu'))
 model.add(Dropout(0.25))
 
 
-model.add(Convolution2D(12,3,3,activation='relu'))
-model.add(Dropout(0.25))
+model.add(Convolution2D(4,3,3,activation='relu'))
+#model.add(Dropout(0.25))
+
 #model.add(MaxPooling2D())
 #model.add(Convolution2D(96,5,5,activation='relu'))
 #model.add(Dropout(0.2))
 #model.add(Convolution2D(18,5,5,activation='relu'))
 model.add(Flatten())
 # model.add(Dense(400))
-model.add(Dense(120))
+model.add(Dense(160))
 model.add(Dropout(0.2))
 #model.add(Dense(160))
 #model.add(Dropout(0.2))
-model.add(Dense(60))
+model.add(Dense(160))
 model.add(Dropout(0.2))
 model.add(Dense(1))
 
