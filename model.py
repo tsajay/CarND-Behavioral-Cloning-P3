@@ -41,7 +41,7 @@ with  open(args.csv_file, "r") as csv_file:
 
 images = []
 measurements = []    
-camera_tilts = [0.0, 0.2, -0.2]
+camera_tilts = [0.05, 0.25, -0.2]
 
 
 from sklearn.utils import shuffle
@@ -190,20 +190,23 @@ model.add(MaxPooling2D(strides=(2,2)))
 #model.add(Dropout(0.25))
 
 model.add(Convolution2D(8,3,3,activation='relu'))
-#model.add(Dropout(0.25))
+model.add(Dropout(0.1))
 
 model.add(Convolution2D(4 ,3,3,activation='relu'))
-model.add(Dropout(0.25))
+model.add(Dropout(0.1))
 
 model.add(Convolution2D(4 ,3,3,activation='relu'))
-#model.add(Dropout(0.25))
+model.add(Dropout(0.1))
 
 model.add(Convolution2D(4 ,3,3,activation='relu'))
-model.add(Dropout(0.25))
+model.add(Dropout(0.1))
 
 
 model.add(Convolution2D(4,3,3,activation='relu'))
-#model.add(Dropout(0.25))
+model.add(Dropout(0.25))
+
+model.add(Convolution2D(4,3,3,activation='relu'))
+model.add(Dropout(0.1))
 
 #model.add(MaxPooling2D())
 #model.add(Convolution2D(96,5,5,activation='relu'))
@@ -211,12 +214,15 @@ model.add(Convolution2D(4,3,3,activation='relu'))
 #model.add(Convolution2D(18,5,5,activation='relu'))
 model.add(Flatten())
 # model.add(Dense(400))
-model.add(Dense(160))
-model.add(Dropout(0.2))
+model.add(Dense(80))
+model.add(Dropout(0.1))
 #model.add(Dense(160))
 #model.add(Dropout(0.2))
-model.add(Dense(160))
-model.add(Dropout(0.2))
+model.add(Dense(40))
+model.add(Dropout(0.1))
+#model.add(Dense(20))
+#model.add(Dropout(0.1))
+#model.add(Dense(10))
 model.add(Dense(1))
 
 model.compile(loss='mse', optimizer='adam')
