@@ -50,7 +50,7 @@ shuffle(samples)
 from sklearn.model_selection import train_test_split
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 
-def generator(samples, batch_size=32):
+def generator(samples, batch_size=32, validation_gen=False):
 
     while 1: # Loop forever so the generator never terminates
         shuffle(samples)
@@ -85,9 +85,11 @@ def generator(samples, batch_size=32):
                         batch_measurements.append(measurement)
                 # Add the mirror images for a given image.
                 a_images = [cv2.flip(im, 1) for im in batch_images]
-                #a_measurements = [(measurement * - 1.0 + (np.random.random()/10.0 - 0.1)) for measurement in batch_measurements]
-                a_measurements = [(measurement * - 1.0) for measurement in batch_measurements]
-                # a_measurements[0] += 0.05
+                if (not validation_gen):
+                    a_measurements = [(measurement * - 1.0 + (np.random.random()/20.0 - 0.05)) for measurement in batch_measurements]
+                else:
+                    # No randomness for validation.
+                    a_measurements = [(measurement * - 1.0) for measurement in batch_measurements]
                 ret_batch_images = np.append(batch_images, a_images, axis = 0)
                 ret_batch_measurements = np.append(batch_measurements, a_measurements, axis = 0)
                 current_batch_size = current_batch_size + rem
@@ -98,56 +100,10 @@ def generator(samples, batch_size=32):
             y_train_batch = np.array(ret_batch_measurements)
             yield shuffle(X_train_batch, y_train_batch)
 
-def val_generator(samples, batch_size=32):
-
-    while 1: # Loop forever so the generator never terminates
-        shuffle(samples)
-        offset = 0
-        while offset < len(samples):
-            next_sample = samples[offset]
-            batch_images = []
-            batch_measurements = []
-            current_batch_size = 0
-            while current_batch_size < batch_size:
-                rem = batch_size - current_batch_size
-                if (rem >= 8):
-                    rem = 8
-                # Add the center, left and right images.
-                for c_pos in range(3):
-                    
-                    source_path = next_sample[c_pos]
-                    filename = source_path.split('/')[-1]
-                    img_path = args.img_dir + '/' + filename
-                    if (not os.path.isfile(img_path)):
-                        print ("Unable to find the training image %s in the img-dir %s. Please check your args" %(filename, args.img_dir))
-                        exit(1)
-                    image = cv2.imread(img_path)
-
-                    batch_images.append(image)
-                    # Using only the center image 
-                    measurement = float(next_sample[c_pos + 3]) + camera_tilts[c_pos]
-                    batch_measurements.append(measurement)
-                    if (c_pos == 0):
-                        batch_images.append(image)
-                        measurement = float(next_sample[3]) 
-                        batch_measurements.append(measurement)
-                # Add the mirror images for a given image.
-                a_images = [cv2.flip(im, 1) for im in batch_images]
-                a_measurements = [(measurement * - 1.0) for measurement in batch_measurements]
-                a_measurements[0] = a_measurements[0] + 0.8
-                ret_batch_images = np.append(batch_images, a_images, axis = 0)
-                ret_batch_measurements = np.append(batch_measurements, a_measurements, axis = 0)
-                current_batch_size = current_batch_size + rem
-            offset += 1
-
-            # trim image to only see section with road
-            X_train_batch = np.array(ret_batch_images)
-            y_train_batch = np.array(ret_batch_measurements)
-            yield shuffle(X_train_batch, y_train_batch)            
 
 # compile and train the model using the generator function
-train_generator = generator(train_samples, batch_size=32)
-validation_generator = generator(validation_samples, batch_size=32)
+train_generator = generator(train_samples, batch_size=32, validation_gen=False)
+validation_generator = generator(validation_samples, batch_size=32, validation_gen=True)
 
 
 
@@ -184,15 +140,15 @@ model.add(Dropout(0.05))
 model.add(Convolution2D(4 ,3,3,activation='relu'))
 model.add(Dropout(0.05))
 
-model.add(Convolution2D(4 ,3,3,activation='relu'))
-model.add(Dropout(0.05))
+#model.add(Convolution2D(14 ,3,3,activation='relu'))
+#model.add(Dropout(0.05))
 
 
-model.add(Convolution2D(4,3,3,activation='relu'))
-model.add(Dropout(0.25))
+#model.add(Convolution2D(16,3,3,activation='relu'))
+#model.add(Dropout(0.25))
 
-model.add(Convolution2D(4,3,3,activation='relu'))
-model.add(Dropout(0.05))
+#model.add(Convolution2D(18,3,3,activation='relu'))
+#model.add(Dropout(0.05))
 
 #model.add(MaxPooling2D())
 #model.add(Convolution2D(96,5,5,activation='relu'))
@@ -200,12 +156,12 @@ model.add(Dropout(0.05))
 #model.add(Convolution2D(18,5,5,activation='relu'))
 model.add(Flatten())
 # model.add(Dense(400))
-model.add(Dense(40))
+model.add(Dense(64))
 model.add(Dropout(0.05))
 #model.add(Dense(160))
 #model.add(Dropout(0.05))
-model.add(Dense(10))
-#model.add(Dropout(0.05))
+model.add(Dense(32))
+model.add(Dropout(0.05))
 #model.add(Dense(20))
 #model.add(Dropout(0.05))
 #model.add(Dense(10))
@@ -221,7 +177,7 @@ model.compile(loss='mse', optimizer='adam')
 
 model.fit_generator(train_generator, samples_per_epoch= \
             len(train_samples) * 8, validation_data=validation_generator, \
-            nb_val_samples=len(validation_samples) * 8, nb_epoch=2, verbose=1
+            nb_val_samples=len(validation_samples), nb_epoch=10, verbose=1
             )
 
 
