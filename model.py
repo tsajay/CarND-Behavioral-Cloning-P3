@@ -87,6 +87,7 @@ def generator(samples, batch_size=32, validation_gen=False):
                 a_images = [cv2.flip(im, 1) for im in batch_images]
                 if (not validation_gen):
                     a_measurements = [(measurement * - 1.0 + (np.random.random()/20.0 - 0.05)) for measurement in batch_measurements]
+                    # a_measurements[0] += 0.025
                 else:
                     # No randomness for validation.
                     a_measurements = [(measurement * - 1.0) for measurement in batch_measurements]
@@ -127,18 +128,18 @@ model.add(Cropping2D(cropping=((70,25), (0,0))))
 # model.add(Convolution2D(3,5,5, subsample=(2,2), activation='relu'))
 # model.add(Flatten(input_shape=(160, 320, 3)))
 model.add(AveragePooling2D(strides=(2,2)))
-model.add(Convolution2D(4,3,3,activation='relu'))
+model.add(Convolution2D(4,7,7,activation='relu'))
 model.add(MaxPooling2D(strides=(2,2)))
 #model.add(Dropout(0.25))
 
-model.add(Convolution2D(8,3,3,activation='relu'))
+model.add(Convolution2D(8,5,5,activation='relu'))
 model.add(Dropout(0.05))
 
-model.add(Convolution2D(4 ,3,3,activation='relu'))
+model.add(Convolution2D(12 ,3,3,activation='relu'))
 model.add(Dropout(0.05))
 
-model.add(Convolution2D(4 ,3,3,activation='relu'))
-model.add(Dropout(0.05))
+#model.add(Convolution2D(4 ,5,5,activation='relu'))
+#model.add(Dropout(0.05))
 
 #model.add(Convolution2D(14 ,3,3,activation='relu'))
 #model.add(Dropout(0.05))
@@ -177,7 +178,7 @@ model.compile(loss='mse', optimizer='adam')
 
 model.fit_generator(train_generator, samples_per_epoch= \
             len(train_samples) * 8, validation_data=validation_generator, \
-            nb_val_samples=len(validation_samples), nb_epoch=10, verbose=1
+            nb_val_samples=len(validation_samples), nb_epoch=3, verbose=1
             )
 
 
