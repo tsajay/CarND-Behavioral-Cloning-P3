@@ -121,22 +121,33 @@ from keras.models import Sequential
 from keras.layers import Flatten, Dense, Lambda, Dropout
 from keras.layers.convolutional import Convolution2D, Cropping2D
 from keras.layers.pooling import MaxPooling2D, AveragePooling2D
+from keras.callbacks import ModelCheckpoint
 
 model = Sequential()
 model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=(160, 320, 3)))
 model.add(Cropping2D(cropping=((70,25), (0,0))))
 # model.add(Convolution2D(3,5,5, subsample=(2,2), activation='relu'))
 # model.add(Flatten(input_shape=(160, 320, 3)))
-model.add(AveragePooling2D(strides=(2,2)))
-model.add(Convolution2D(4,7,7,activation='relu'))
-model.add(MaxPooling2D(strides=(2,2)))
-#model.add(Dropout(0.25))
-
-model.add(Convolution2D(8,5,5,activation='relu'))
+#model.add(AveragePooling2D(strides=(2,2)))
+model.add(Convolution2D(4,7,7,subsample=(1,2), activation='relu'))
+#model.add(MaxPooling2D(strides=(2,2)))
 model.add(Dropout(0.05))
 
-model.add(Convolution2D(12 ,3,3,activation='relu'))
+model.add(Convolution2D(5,5,5, subsample=(1,2), activation='relu'))
 model.add(Dropout(0.05))
+
+model.add(Convolution2D(6,5,5, subsample=(2,2), activation='relu'))
+model.add(Dropout(0.05))
+
+model.add(Convolution2D(6,3,3, subsample=(1,1), activation='relu'))
+model.add(Dropout(0.05))
+
+model.add(Convolution2D(6,3,3, subsample=(1,1), activation='relu'))
+model.add(Dropout(0.05))
+
+model.add(Convolution2D(6,3,3, subsample=(1,1), activation='relu'))
+model.add(Dropout(0.05))
+
 
 #model.add(Convolution2D(4 ,5,5,activation='relu'))
 #model.add(Dropout(0.05))
@@ -157,12 +168,12 @@ model.add(Dropout(0.05))
 #model.add(Convolution2D(18,5,5,activation='relu'))
 model.add(Flatten())
 # model.add(Dense(400))
-model.add(Dense(64))
-model.add(Dropout(0.05))
+model.add(Dense(32))
+#model.add(Dropout(0.25))
 #model.add(Dense(160))
 #model.add(Dropout(0.05))
-model.add(Dense(32))
-model.add(Dropout(0.05))
+model.add(Dense(10))
+# model.add(Dropout(0.25))
 #model.add(Dense(20))
 #model.add(Dropout(0.05))
 #model.add(Dense(10))
@@ -175,11 +186,12 @@ model.compile(loss='mse', optimizer='adam')
 #            nb_val_samples=len(validation_samples), nb_epoch=3)
 # fit_generator(generator, steps_per_epoch, epochs=1, verbose=1, callbacks=None, \ 
 # validation_data=None, validation_steps=None, )
-
+checkpointer = ModelCheckpoint(filepath="weights.{epoch:02d}-{val_loss:.4f}.hdf5")
+model.load_model('model_best.h5')
 model.fit_generator(train_generator, samples_per_epoch= \
             len(train_samples) * 8, validation_data=validation_generator, \
-            nb_val_samples=len(validation_samples), nb_epoch=3, verbose=1
-            )
+            nb_val_samples=len(validation_samples) * 8, nb_epoch=15, verbose=1
+            , callbacks=[checkpointer])
 
 
 
