@@ -17,6 +17,7 @@ import cv2
 from keras.models import load_model
 import h5py
 from keras import __version__ as keras_version
+from random import randint
 
 parser = argparse.ArgumentParser(description='Train a model in Keras.')
 parser.add_argument('-c', '--csv_file', required=True, help='Path to the csv file with training data and path to images.')
@@ -26,6 +27,9 @@ parser.add_argument('-e', '--epochs', default=1, help='Number of epochs for trai
 parser.add_argument('-s', '--save_model', default="model.h5", help='Name for the final saved model.')
 parser.add_argument('-p', '--checkpoint', action='store_true', help='Checkpoint intermediate epochs.')
 parser.add_argument('-n', '--checkpoint_name', default='cp', help='Checkpoint name (suffix-only).')
+parser.add_argument('-o', '--only_center', action='store_true', help='Only center images for training')
+parser.add_argument('-l', '--learning_rate', default=0.001, help='Optional learning rate for Adam optimizer (default = 0.001)')
+parser.add_argument('-b', '--batch_size', default=32, help='Optional learning rate for Adam optimizer (default = 0.001)')
 
 args = parser.parse_args()
 
@@ -46,16 +50,36 @@ with  open(args.csv_file, "r") as csv_file:
 
 images = []
 measurements = []    
-camera_tilts = [0.0, 0.2, -0.2]
+camera_tilts = [0.02, 0.2, -0.2]
 
 
 from sklearn.utils import shuffle
 shuffle(samples)
 
 from sklearn.model_selection import train_test_split
+from scipy.ndimage.interpolation import shift 
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 
-def generator(samples, batch_size=32, validation_gen=False):
+
+'''
+image is a 3-D vector. width X height X num_channels
+
+Returns a 3-D vector of the same size. Images are shifted randomly by 5 pixels either up/down/left/right
+'''
+def getAugmentedImageWithShifts(image):
+    
+    shift_vectors = [[0, -5, 0], # Up 
+                     [0,  5, 0], # Down
+                     [-5, 0, 0], # Left
+                     [5,  0, 0]] # Right
+    
+    direction = randint(0,3)
+    image = shift(image, shift_vectors[direction])
+    
+    return image
+
+
+def generator(samples,batch_size=32, validation_gen=False,  only_center=False):
 
     while 1: # Loop forever so the generator never terminates
         shuffle(samples)
@@ -70,6 +94,9 @@ def generator(samples, batch_size=32, validation_gen=False):
                 if (rem >= 8):
                     rem = 8
                 # Add the center, left and right images.
+                camera_range = 3
+                if only_center:
+                    camera_range = 1
                 for c_pos in range(3):
                     
                     source_path = next_sample[c_pos]
@@ -79,6 +106,8 @@ def generator(samples, batch_size=32, validation_gen=False):
                         print ("Unable to find the training image %s in the img-dir %s. Please check your args" %(filename, args.img_dir))
                         exit(1)
                     image = cv2.imread(img_path)
+                    if (c_pos == 0):
+                        image = getAugmentedImageWithShifts(image)
 
                     batch_images.append(image)
                     # Using only the center image 
@@ -90,7 +119,7 @@ def generator(samples, batch_size=32, validation_gen=False):
                         batch_measurements.append(measurement)
                 # Add the mirror images for a given image.
                 a_images = [cv2.flip(im, 1) for im in batch_images]
-                if (not validation_gen):
+                if (not validation_gen or only_center):
                     a_measurements = [(measurement * - 1.0 + (np.random.random()/20.0 - 0.05)) for measurement in batch_measurements]
                     # a_measurements[0] += 0.025
                 else:
@@ -108,8 +137,8 @@ def generator(samples, batch_size=32, validation_gen=False):
 
 
 # compile and train the model using the generator function
-train_generator = generator(train_samples, batch_size=32, validation_gen=False)
-validation_generator = generator(validation_samples, batch_size=32, validation_gen=True)
+train_generator = generator(train_samples, batch_size=args.batch_size, validation_gen=False, only_center=args.only_center)
+validation_generator = generator(validation_samples, batch_size=args.batch_size, validation_gen=True, only_center=args.only_center)
 
 
 
@@ -180,7 +209,7 @@ def build_model():
     model.add(Dense(10))
     model.add(Dense(1))
 
-    adam_optimizer = Adam(lr=0.0005)
+    adam_optimizer = Adam(lr=args.learning_rate)
 
     model.compile(loss='mse', optimizer=adam_optimizer)
     # model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=7, batch_size=16)
@@ -198,16 +227,19 @@ if (not args.model_load is None):
 else:
     model = build_model()
 
+aug_factor = 8
+if args.only_center:
+    aug_factor = 4
 if (args.checkpoint):    
     checkpointer = ModelCheckpoint(filepath= "%s.{epoch:02d}-{val_loss:.4f}.hdf5" %args.checkpoint_name)
     model.fit_generator(train_generator, samples_per_epoch= \
-            len(train_samples) * 8, validation_data=validation_generator, \
-            nb_val_samples=len(validation_samples) * 8, nb_epoch=int(args.epochs), verbose=1
+            len(train_samples) * aug_factor, validation_data=validation_generator, \
+            nb_val_samples=len(validation_samples) * aug_factor, nb_epoch=int(args.epochs), verbose=1
             , callbacks=[checkpointer])
 else:
     model.fit_generator(train_generator, samples_per_epoch= \
-            len(train_samples) * 8, validation_data=validation_generator, \
-            nb_val_samples=len(validation_samples) * 8, nb_epoch=int(args.epochs), verbose=1)
+            len(train_samples) * aug_factor, validation_data=validation_generator, \
+            nb_val_samples=len(validation_samples) * aug_factor, nb_epoch=int(args.epochs), verbose=1)
 
 
 model.save(args.save_model)
