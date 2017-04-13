@@ -25,6 +25,7 @@ parser.add_argument('-m', '--model_load', help='A model to pre-load for training
 parser.add_argument('-e', '--epochs', default=1, help='Number of epochs for training.')
 parser.add_argument('-s', '--save_model', default="model.h5", help='Name for the final saved model.')
 parser.add_argument('-p', '--checkpoint', action='store_true', help='Checkpoint intermediate epochs.')
+parser.add_argument('-n', '--checkpoint_name', default='cp', help='Checkpoint name (suffix-only).')
 
 args = parser.parse_args()
 
@@ -127,6 +128,7 @@ from keras.layers.convolutional import Convolution2D, Cropping2D
 from keras.layers.normalization import BatchNormalization
 from keras.layers.pooling import MaxPooling2D, AveragePooling2D
 from keras.callbacks import ModelCheckpoint
+from keras.optimizers  import Adam
 
 
 def build_model():
@@ -178,7 +180,9 @@ def build_model():
     model.add(Dense(10))
     model.add(Dense(1))
 
-    model.compile(loss='mse', optimizer='adam')
+    adam_optimizer = Adam(lr=0.0005)
+
+    model.compile(loss='mse', optimizer=adam_optimizer)
     # model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=7, batch_size=16)
     # model.fit_generator(train_generator, samples_per_epoch=len(X_train)
     #            len(train_samples), validation_data=validation_generator, /
@@ -195,7 +199,7 @@ else:
     model = build_model()
 
 if (args.checkpoint):    
-    checkpointer = ModelCheckpoint(filepath="weights.{epoch:02d}-{val_loss:.4f}.hdf5")
+    checkpointer = ModelCheckpoint(filepath= "%s.{epoch:02d}-{val_loss:.4f}.hdf5" %args.checkpoint_name)
     model.fit_generator(train_generator, samples_per_epoch= \
             len(train_samples) * 8, validation_data=validation_generator, \
             nb_val_samples=len(validation_samples) * 8, nb_epoch=int(args.epochs), verbose=1
