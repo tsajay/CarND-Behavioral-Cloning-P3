@@ -67,7 +67,7 @@ def telemetry(sid, data):
         throttle = controller.update(float(speed))
 
         print(steering_angle, throttle)
-        send_control(float("{0:.2f}".format(steering_angle)) * 3.0, throttle)
+        send_control(float("{0:.2f}".format(steering_angle)) * 1.5, throttle)
 
         # save frame
         if args.image_folder != '':
