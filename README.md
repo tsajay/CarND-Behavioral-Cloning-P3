@@ -135,16 +135,4 @@ The video will run at 48 FPS. The default FPS is 60.
   * Start the playback application and click on the _Autonomous Driving_ option. 
   * Run _python drive.py <your_saved_model>_ 
 
-
-
-
-
-
-parser.add_argument('-m', '--model_load', help='A model to pre-load for training.')
-parser.add_argument('-s', '--save_model', default="model.h5", help='Name for the final saved model.')
-parser.add_argument('-n', '--checkpoint_name', default='cp', help='Checkpoint name (suffix-only).')
-parser.add_argument('-o', '--only_center', action='store_true', help='Only center images for training')
-parser.add_argument('-l', '--learning_rate', default=0.001, help='Optional learning rate for Adam optimizer (default = 0.001)')
-parser.add_argument('-b', '--batch_size', default=32, help='Optional learning rate for Adam optimizer (default = 0.001)')
-
-#### Please see the writeup_template.md for the project explanation.
+## Please see the writeup_template.md for the project explanation.
