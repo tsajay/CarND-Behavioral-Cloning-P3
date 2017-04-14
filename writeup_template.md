@@ -1,4 +1,4 @@
-##Behavioral Cloning
+## Behavioral Cloning
 
 ---
 
@@ -54,7 +54,7 @@ My model consists of pre-processing layers - very similar to what was discussed 
 
 This is the model I converged to after a lot of experimentation. 
 
-![nnvis][Ajay's neural network for steering angle prediction.]
+![Ajay's neural network for steering angle prediction.][nnvis]
 
 I started off with the LeNet modified model used for traffic signs classification, but I did see that it was inadequate, even after adding a few more fully-connected layers. (More explantion below)
 
@@ -85,17 +85,15 @@ Salient points about my model. The 5 convolutional layers are used to learn comp
 
   * When my training data had consistently high errors, I guessed that I had insufficient data, even after augmentation. I had to reduce the number of parameters in the network (to 239K from over a million). This was one of the first steps that helped me get better with more training. 
 
-####3. Model parameter tuning
+#### 3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model uses Adam optimizer, but my program takes in a parameter for learning rate. I had to do this to ensure that the model does not overtrain when I'm retraining for problematic cases, or for driving around sharp edges. 
 
-####4. Appropriate training data
+#### 4. Appropriate training data
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+The section on attempts to prevent overfitting discussed how appropriate training data was used. (augmentation, from second track, explicit driving in problematic curves, and recovery from erroneous driving.)
 
-For details about how I created the training data, see the next section. 
-
-###Model Architecture and Training Strategy
+### Model Architecture and Training Strategy
 
 ####1. Solution Design Approach
 
