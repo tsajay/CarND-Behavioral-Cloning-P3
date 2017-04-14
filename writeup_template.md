@@ -109,7 +109,7 @@ The data augmentation section also discusses some of the approaches that I tried
 
 #### 2. Final Model Architecture
 
-The network I arrived at is inspired from [this paper] (https://arxiv.org/pdf/1604.07316.pdf). The parameters are pruned to fit my image size. The number of parameters in the fully-connected layer are pruned to accommodate for my training set size.
+The network I arrived at is inspired from [this paper](https://arxiv.org/pdf/1604.07316.pdf). The parameters are pruned to fit my image size. The number of parameters in the fully-connected layer are pruned to accommodate for my training set size.
 
 Training this network on my image size results in the following characteristics.
 * The first few epochs of training generalize well, and the steering angles are scaled slightly less than ideal at curves since most of the course is straight. Still, the direction of steering is correct. One can use the training from initial epochs and add a factor in the drive.py to drive within the course from the first few epochs of training itself. __This is my chosen approach__
@@ -130,20 +130,25 @@ Here's an image from the second track.
 ![Image from the second track][second]
 
 Here's an image from the re-training of  sharp curves.
+
 ![Sharp turn][sharp]
 
 Here's the laterally inverted image of the sharp turn, added as an augmented image.
+
 ![Sharp turn augmented image with a horizontal flip][left_flip]
 
 Here's an image where we slightly shift a training image by a few pixels so that different parts of the layer are trained.
+
 ![Slightly shifted image of the sharp turn.][shift]
 
 
 Here's an image from an attempted recovery from driving off course. 
+
 ![Recovery from driving off course. Image from center camera][recovery]
 
 
 After the collection process, I had 69K training images and close to 90K total images, 20% of which were used for validation. 
 
-Here's a [video](video.mp4) of the car driving autonomously for more than a lap.
+Finally, here's a [video](video.mp4) of the car driving autonomously for more than a lap.
+
 
