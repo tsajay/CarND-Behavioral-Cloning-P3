@@ -16,11 +16,12 @@ The goals / steps of this project are the following:
 
 [nnvis]: ./examples/ajays_neural_network.png "Model Visualization"
 [video]: ./video.mp4 "Video of the car driving autonomously."
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[second]: ./examples/second_track.png "Image from second track"
+[sharp]: ./examples/sharp_turn.png "Sharp turn"
+[left_flip]: ./examples/sharp_turn_flipped.png "Left flipped image"
+[shift]: ./examples/sharp_turn_shifted.png "Images with shift augmentation"
+[recovery]: ./examples/recovery.png "Recovery from driving off course. Image from center camera" 
+
 
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -120,22 +121,29 @@ The sections above show the network architecture.
 
 #### 3. Creation of the Training Set & Training Process
 
-This is covered in reduce overfitting section.
+This is covered in great detail in  "Reduce overfitting" section.
+
+I'm pasting a few images from my training set.
 
 Here's an image from the second track.
 
-![alt text][image2]
+![Image from the second track][second]
+
+Here's an image from the re-training of  sharp curves.
+![Sharp turn][sharp]
+
+Here's the laterally inverted image of the sharp turn, added as an augmented image.
+![Sharp turn augmented image with a horizontal flip][left_flip]
+
+Here's an image where we slightly shift a training image by a few pixels so that different parts of the layer are trained.
+![Slightly shifted image of the sharp turn.][shift]
+
 
 Here's an image from an attempted recovery from driving off course. 
-
-Here are a few augmented images. 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+![Recovery from driving off course. Image from center camera][recovery]
 
 
 After the collection process, I had 69K training images and close to 90K total images, 20% of which were used for validation. 
 
-Here's a video of the car driving autonomously for more than a lap.
+Here's a [video](video.mp4) of the car driving autonomously for more than a lap.
 
-![Video of the car driving autonomously][video]
