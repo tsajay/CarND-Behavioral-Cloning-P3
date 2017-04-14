@@ -138,4 +138,4 @@ After the collection process, I had 69K training images and close to 90K total i
 
 Here's a video of the car driving autonomously for more than a lap.
 
-![Video of the car driving autonomously][video.mp4]
+![Video of the car driving autonomously][video]
