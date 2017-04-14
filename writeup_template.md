@@ -1,8 +1,4 @@
-#**Behavioral Cloning** 
-
-##Writeup Template
-
-###You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
+# **Behavioral Cloning** 
 
 ---
 
@@ -18,7 +14,7 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/placeholder.png "Model Visualization"
+[nnvis]: ./examples/ajays_neural_network.png "Model Visualization"
 [image2]: ./examples/placeholder.png "Grayscaling"
 [image3]: ./examples/placeholder_small.png "Recovery Image"
 [image4]: ./examples/placeholder_small.png "Recovery Image"
@@ -54,9 +50,16 @@ The model.py file contains the code for training and saving the convolution neur
 
 ####1. An appropriate model architecture has been employed
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+My model consists of pre-processing layers - very similar to what was discussed in the lectures, followed by a set of convolutional and pooling layers, and then followed by a few fully connected layers. 
 
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+This is the model I converged to after a lot of experimentation. 
+
+[nnvis]
+
+I started off with the LeNet modified model used for traffic signs classification, but I did see that it was inadequate, even after adding a few more fully-connected layers. 
+
+I started reading some literature online about AlexNet and VGG. Both of them in their plain form were too heavyweight for the small number of images I had (on the order of 20K.) The model I used is quite inspired by [this paper](https://arxiv.org/pdf/1604.07316.pdf). Again, I modified the convolutional layers to suit my input image sizes. Also, the sizes of the fully-connected layers are reduced to prevent under-fitting, given my dataset size. 
+
 
 ####2. Attempts to reduce overfitting in the model
 
