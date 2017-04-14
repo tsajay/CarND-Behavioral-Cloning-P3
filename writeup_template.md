@@ -15,7 +15,7 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [nnvis]: ./examples/ajays_neural_network.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
+[video]: ./video.mp4 "Video of the car driving autonomously."
 [image3]: ./examples/placeholder_small.png "Recovery Image"
 [image4]: ./examples/placeholder_small.png "Recovery Image"
 [image5]: ./examples/placeholder_small.png "Recovery Image"
@@ -135,3 +135,7 @@ Here are a few augmented images.
 
 
 After the collection process, I had 69K training images and close to 90K total images, 20% of which were used for validation. 
+
+Here's a video of the car driving autonomously for more than a lap.
+
+![Video of the car driving autonomously][video.mp4]

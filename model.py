@@ -19,7 +19,7 @@ import h5py
 from keras import __version__ as keras_version
 from random import randint
 
-parser = argparse.ArgumentParser(description='Train a model in Keras.')
+parser = argparse.ArgumentParser(description='Train a model in Keras and TensorFlow.')
 parser.add_argument('-c', '--csv_file', required=True, help='Path to the csv file with training data and path to images.')
 parser.add_argument('-i', '--img_dir', required=True, help='Path to the images directory.')
 parser.add_argument('-m', '--model_load', help='A model to pre-load for training.')
@@ -225,6 +225,11 @@ if (not args.model_load is None):
     model = load_model(args.model_load)
 else:
     model = build_model()
+
+from keras.utils import visualize_util
+
+visualize_util.plot(model, to_file='model.png')
+exit()
 
 # Each row of 3 images generates 8 training/validation images. 
 aug_factor = 8
