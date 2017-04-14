@@ -95,56 +95,43 @@ The section on attempts to prevent overfitting discussed how appropriate trainin
 
 ### Model Architecture and Training Strategy
 
-####1. Solution Design Approach
+#### 1. Solution Design Approach
 
-The first step was to ensure I was able to transform the images into a form of trainable data. That's the first version of model.py. I used a linear regression model as suggested in the lecture videos.
+It would be a sham to say that I started off with a solution design approach. This was a learning experience, with lots of experimentation, for me, as well as for my model.
 
-The overall strategy for deriving a model architecture was to 
+The small network used to classify numbers or traffic signals proved inadequeate for staying on the course even for the first 2 curves. 
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+I then researched the well known networks like AlexNet, VGG and GoogLeNet. They're all too big (too many parameters) for a training set of my size (~80K training + validation images after augmentation). 
 
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+The data augmentation section also discusses some of the approaches that I tried and failed, before I came up with this network.
 
-To combat the overfitting, I modified the model so that ...
 
-Then I ... 
+#### 2. Final Model Architecture
 
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
+The network I arrived at is inspired from [this paper] (https://arxiv.org/pdf/1604.07316.pdf). The parameters are pruned to fit my image size. The number of parameters in the fully-connected layer are pruned to accommodate for my training set size.
 
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
+Training this network on my image size results in the following characteristics.
+* The first few epochs of training generalize well, and the steering angles are scaled slightly less than ideal at curves since most of the course is straight. Still, the direction of steering is correct. One can use the training from initial epochs and add a factor in the drive.py to drive within the course from the first few epochs of training itself. __This is my chosen approach__
+* The last few epochs of training tend to overfit in terms of driving too close to the lane markings. Though the car still stays within course for the most part, minor perturbations are enough to steer it off course. 
 
-####2. Final Model Architecture
+Hence, though I have several networks where the car can complete laps from later-epoch-trained networks (> 10), I chose to submit the more general network where adjusting the steering angle with a correction factor is sufficient for the car to go around the course indefinitely.  
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+The sections above show the network architecture. 
 
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
+#### 3. Creation of the Training Set & Training Process
 
-![alt text][image1]
+This is covered in reduce overfitting section.
 
-####3. Creation of the Training Set & Training Process
-
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+Here's an image from the second track.
 
 ![alt text][image2]
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
+Here's an image from an attempted recovery from driving off course. 
 
+Here are a few augmented images. 
 ![alt text][image3]
 ![alt text][image4]
 ![alt text][image5]
 
-Then I repeated this process on track two in order to get more data points.
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
-
-![alt text][image6]
-![alt text][image7]
-
-Etc ....
-
-After the collection process, I had X number of data points. I then preprocessed this data by ...
-
-
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
-
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+After the collection process, I had 69K training images and close to 90K total images, 20% of which were used for validation. 
