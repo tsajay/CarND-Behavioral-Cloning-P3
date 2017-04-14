@@ -1,3 +1,4 @@
+# Only modification is to downloa the Linux MPEG editor.
 import imageio
 imageio.plugins.ffmpeg.download()
 from moviepy.editor import ImageSequenceClip

@@ -1,3 +1,5 @@
+# A modified drive.py that adds a steering angle correction factor.
+
 import argparse
 import base64
 from datetime import datetime
@@ -21,6 +23,11 @@ app = Flask(__name__)
 model = None
 prev_image_array = None
 
+# These variable Will be updated by main() after argparse.
+set_speed = 9
+correction_factor = 3.25
+
+
 
 class SimplePIController:
     def __init__(self, Kp, Ki):
@@ -43,10 +50,6 @@ class SimplePIController:
         return self.Kp * self.error + self.Ki * self.integral
 
 
-controller = SimplePIController(0.1, 0.002)
-set_speed = 9
-#set_speed = 18
-controller.set_desired(set_speed)
 
 
 @sio.on('telemetry')
@@ -67,9 +70,9 @@ def telemetry(sid, data):
         throttle = controller.update(float(speed))
 
         print(steering_angle, throttle)
-        #send_control(float("{0:.2f}".format(steering_angle)) * 2.5 + (np.random.random()/10.0 - 0.1), throttle)
+        
 
-        send_control(float("{0:.2f}".format(steering_angle)) * 3.25, throttle)
+        send_control(float("{0:.2f}".format(steering_angle)) * correction_factor, throttle)
 
         # save frame
         if args.image_folder != '':
@@ -111,7 +114,21 @@ if __name__ == '__main__':
         default='',
         help='Path to image folder. This is where the images from the run will be saved.'
     )
+    parser.add_argument('-c', '--correction_factor', default=3.25, help='Allow to drive with a steering angle correction factor')
+    parser.add_argument('-s', '--speed_in_mph', default=9.0, help='Speed of the car in MPH')
+    
     args = parser.parse_args()
+    global set_speed 
+    set_speed = args.speed_in_mph
+    global correction_factor 
+    correction_factor = args.correction_factor
+    controller = SimplePIController(0.1, 0.002)
+
+
+
+
+    controller.set_desired(set_speed)
+
 
     # check that model Keras version is same as local Keras version
     f = h5py.File(args.model, mode='r')
