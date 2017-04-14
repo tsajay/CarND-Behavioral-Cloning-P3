@@ -1,5 +1,8 @@
 ## Behavioral Cloning
 
+**All the project files including [this writeup](https://github.com/tsajay/CarND-Behavioral-Cloning-P3/blob/master/writeup_template.md) are available in github.**
+**See [here](https://github.com/tsajay/CarND-Behavioral-Cloning-P3)**
+
 ---
 
 **Behavioral Cloning Project**
