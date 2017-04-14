@@ -78,7 +78,9 @@ For details about how I created the training data, see the next section.
 
 ####1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to ...
+The first step was to ensure I was able to transform the images into a form of trainable data. That's the first version of model.py. I used a linear regression model as suggested in the lecture videos.
+
+The overall strategy for deriving a model architecture was to 
 
 My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
 

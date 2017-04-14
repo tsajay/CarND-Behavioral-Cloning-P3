@@ -116,3 +116,35 @@ The video will run at 48 FPS. The default FPS is 60.
 
 1. It's been noted the simulator might perform differently based on the hardware. So if your model drives succesfully on your machine it might not on another machine (your reviewer). Saving a video is a solid backup in case this happens.
 2. You could slightly alter the code in `drive.py` and/or `video.py` to create a video of what your model sees after the image is processed (may be helpful for debugging).
+
+# Steps for data capture, training and testing.
+1. **Capturing the data for training**: 
+  * Run the binary for the required platform to start the playback application. In Linux this is called ./linux_sim.x86_64. 
+  * Follow the instructions in the application to record your driving around the track. Once you configure the directory to dump the recorded data, the images will be dumped in the 'IMG' sub-directory and the database of the images along with steering angles from various camera positions will be in a CSV file in the same directory.
+2. **Training the network**. 
+  * The main script is called model.py. The script requires at least 2 arguments - the path to the images directory and the path to the CSV file that will form the DB of images. This is sufficient to get started with training.
+  * The script also allows for the following training options. 
+    * Number of epochs for training. 
+    * Checkpointing the models generated from intermediate epochs. (The final model is always generated.)
+    * Learning rate
+    * Batch size
+    * Pre-loading an existing model and training with new data. (Note that for this option, you cannot change the neural network configuration.)
+    * Names for checkpoints and final modes.
+  * Run _python model.py -h_ to see all the options supported.
+3. **Testing your trained model**
+  * Start the playback application and click on the _Autonomous Driving_ option. 
+  * Run _python drive.py <your_saved_model>_ 
+
+
+
+
+
+
+parser.add_argument('-m', '--model_load', help='A model to pre-load for training.')
+parser.add_argument('-s', '--save_model', default="model.h5", help='Name for the final saved model.')
+parser.add_argument('-n', '--checkpoint_name', default='cp', help='Checkpoint name (suffix-only).')
+parser.add_argument('-o', '--only_center', action='store_true', help='Only center images for training')
+parser.add_argument('-l', '--learning_rate', default=0.001, help='Optional learning rate for Adam optimizer (default = 0.001)')
+parser.add_argument('-b', '--batch_size', default=32, help='Optional learning rate for Adam optimizer (default = 0.001)')
+
+#### Please see the writeup_template.md for the project explanation.
