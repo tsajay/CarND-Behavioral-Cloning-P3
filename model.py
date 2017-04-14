@@ -193,43 +193,47 @@ def build_model():
     
     # Input-shape = 1 x 14 x 10, Output-shape = 140
     model.add(Flatten())
-    # model.add(Dense(400))
+
+    # Input-shape = 140, Output-shape = 128
     model.add(Dense(128))
     model.add(Dropout(0.15))
-    #model.add(Dense(160))
-    #model.add(Dropout(0.05))
+
+    # Input-shape = 128, Output-shape = 64
     model.add(Dense(64))
     model.add(Dropout(0.15))
-    # model.add(Dropout(0.25))
-    #model.add(Dense(20))
-    #model.add(Dropout(0.05))
+
+    # Input-shape = 64, Output-shape = 32
     model.add(Dense(32))
     model.add(Dropout(0.15))
 
+    # Input-shape = 32, Output-shape = 10
     model.add(Dense(10))
+
+    # Final steering angle
     model.add(Dense(1))
 
     adam_optimizer = Adam(lr=args.learning_rate)
 
     model.compile(loss='mse', optimizer=adam_optimizer)
-    # model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=7, batch_size=16)
-    # model.fit_generator(train_generator, samples_per_epoch=len(X_train)
-    #            len(train_samples), validation_data=validation_generator, /
-    #            nb_val_samples=len(validation_samples), nb_epoch=3)
-    # fit_generator(generator, steps_per_epoch, epochs=1, verbose=1, callbacks=None, \ 
-    # validation_data=None, validation_steps=None, )
+    
     model.summary()
     return model
 
-
+# Allow for training special cases from an already trained network.
+# Loads an existing model.
 if (not args.model_load is None):
     model = load_model(args.model_load)
 else:
     model = build_model()
 
+# Each row of 3 images generates 8 training/validation images. 
 aug_factor = 8
+
+# For debug - discard side camera images.
 if args.only_center:
     aug_factor = 4
+
+# Allow checkpointing intermediate epochs.
 if (args.checkpoint):    
     checkpointer = ModelCheckpoint(filepath= "%s.{epoch:02d}-{val_loss:.4f}.hdf5" %args.checkpoint_name)
     model.fit_generator(train_generator, samples_per_epoch= \
@@ -241,6 +245,6 @@ else:
             len(train_samples) * aug_factor, validation_data=validation_generator, \
             nb_val_samples=len(validation_samples) * aug_factor, nb_epoch=int(args.epochs), verbose=1)
 
-
+# Always save the final model.
 model.save(args.save_model)
 exit()
