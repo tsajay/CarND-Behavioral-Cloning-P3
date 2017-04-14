@@ -1,4 +1,4 @@
-# **Behavioral Cloning** 
+##Behavioral Cloning
 
 ---
 
@@ -23,12 +23,12 @@ The goals / steps of this project are the following:
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
 ## Rubric Points
-###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
+### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
 
 ---
-###Files Submitted & Code Quality
+### Files Submitted & Code Quality
 
-####1. Submission includes all required files and can be used to run the simulator in autonomous mode
+#### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
 
 My project includes the following files:
 * model.py containing the script to create and train the model
@@ -36,36 +36,54 @@ My project includes the following files:
 * model.h5 containing a trained convolution neural network 
 * writeup_report.md or writeup_report.pdf summarizing the results
 
-####2. Submission includes functional code
+#### 2. Submission includes functional code
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
 ```sh
 python drive.py model.h5
 ```
 
-####3. Submission code is usable and readable
+#### 3. Submission code is usable and readable
 
 The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
 
-###Model Architecture and Training Strategy
+### Model Architecture and Training Strategy
 
-####1. An appropriate model architecture has been employed
+#### 1. An appropriate model architecture has been employed
 
 My model consists of pre-processing layers - very similar to what was discussed in the lectures, followed by a set of convolutional and pooling layers, and then followed by a few fully connected layers. 
 
 This is the model I converged to after a lot of experimentation. 
 
-[nnvis]
+![nnvis][Ajay's neural network for steering angle prediction.]
 
-I started off with the LeNet modified model used for traffic signs classification, but I did see that it was inadequate, even after adding a few more fully-connected layers. 
+I started off with the LeNet modified model used for traffic signs classification, but I did see that it was inadequate, even after adding a few more fully-connected layers. (More explantion below)
 
 I started reading some literature online about AlexNet and VGG. Both of them in their plain form were too heavyweight for the small number of images I had (on the order of 20K.) The model I used is quite inspired by [this paper](https://arxiv.org/pdf/1604.07316.pdf). Again, I modified the convolutional layers to suit my input image sizes. Also, the sizes of the fully-connected layers are reduced to prevent under-fitting, given my dataset size. 
 
+Salient points about my model. The 5 convolutional layers are used to learn complex shapes (simpler shapes in the first few layers, followed by more complex shapes in later layers). The model needs to output a single floating point number based on the shapes learnt in the convolutional layers. The set of fully connected layers (with the use of dropout) help in this. I initally was using a large number of connections in the fully-connected layers, which resulted in severe under-fitting. This design was a convergence of expermintation of FC layers of various sizes.
 
-####2. Attempts to reduce overfitting in the model
+#### 2. Attempts to reduce overfitting and under-fitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+1. __Data Augmentation__
+  * For each position of the car, we get 3 images from front, left and right cameras. First, the center camera image is shifted by a random direction (up, left, front or right) by 5 pixels. These images are laterally inverted to get a set of 8 images. 
+  * Note that I intriduce a slight shift to the center camera angle so that the inverted image gets the negative shift.
+  
+2. __Data capture from second track__
+  * I captured data from the second track to ensure that the model I'm training for consists of images of tracks that we'll not be testing on. This greatly helped in getting past the first big curve. 
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+3. __Explicit data capture in problematic curves__
+  * The track consists of mainly sections where the car drives stright. 
+    * So, at curves, the the car is slow to react fast for the first few training epochs.
+    * If we use a model that's trained for several epochs, the car drives exactly like the way I do -- it hugs the curves (eerie) --, but slight perturbations can cause the car to go off tracks. So, I drove 10 times around the problematic curves and trained my already trained network. _Thank you Transfer Learning_. See the options in my [model.py](model.py) script to start learning from a saved network.
+
+4. __Data capture from erroneous driving recovery__
+  
+  * This was a very helpful tip in the lectures. I used the already trained network and captured data only for the part where I was recovering from getting off the tracks.
+  * This also made my model slightly prefer corners in driving, but the car for all parts of the course preferred staying close to the edges but not straddle them. 
+
+5. __Reducing the number of parameters of the model__
+
+  * When my training data had consistently high errors, I guessed that I had insufficient data, even after augmentation. I had to reduce the number of parameters in the network (to 239K from over a million). This was one of the first steps that helped me get better with more training. 
 
 ####3. Model parameter tuning
 
