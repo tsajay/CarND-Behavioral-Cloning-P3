@@ -229,7 +229,7 @@ else:
 from keras.utils import visualize_util
 
 visualize_util.plot(model, to_file='model.png')
-exit()
+
 
 # Each row of 3 images generates 8 training/validation images. 
 aug_factor = 8
