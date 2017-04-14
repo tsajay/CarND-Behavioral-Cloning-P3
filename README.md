@@ -135,4 +135,4 @@ The video will run at 48 FPS. The default FPS is 60.
   * Start the playback application and click on the _Autonomous Driving_ option. 
   * Run _python drive.py <your_saved_model>_ 
 
-## Please see the writeup_template.md for the project explanation.
+## Please see the [writeup_template](writeup_template.md) for the project explanation.
